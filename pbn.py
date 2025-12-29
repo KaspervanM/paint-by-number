@@ -1,5 +1,6 @@
 from PIL import Image
-from typing import List, Tuple, Protocol
+from abc import ABC, abstractmethod
+from typing import List, Tuple
 import argparse
 import pathlib
 import math
@@ -7,15 +8,20 @@ import math
 Color = Tuple[int, int, int]
 
 
-class ColorQuantizationAlgorithm(Protocol):
+class ColorQuantizationAlgorithm(ABC):
     """Protocol for color quantization algorithms."""
+
+    name: str = "BaseAlgorithm"
 
     def quantize(self, image: Image.Image, palette: List[Color]) -> Image.Image:
         """Quantize an image to a fixed color palette."""
+        pass
 
 
-class NearestColorQuantization:
+class NearestColorQuantization(ColorQuantizationAlgorithm):
     """Trivial color quantization using nearest RGB distance."""
+
+    name: str = "NearestColorQuantization"
 
     def quantize(self, image: Image.Image, palette: List[Color]) -> Image.Image:
         """Map each pixel to the nearest color in the palette."""
@@ -38,8 +44,10 @@ class NearestColorQuantization:
         return math.sqrt(sum((ac - bc) ** 2 for ac, bc in zip(a, b)))
 
 
-class FloydSteinbergDithering:
+class FloydSteinbergDithering(ColorQuantizationAlgorithm):
     """Color quantization using Floyd–Steinberg error diffusion dithering."""
+
+    name: str = "FloydSteinbergDithering"
 
     def quantize(self, image: Image.Image, palette: List[Color]) -> Image.Image:
         """Quantize an image to the palette using Floyd–Steinberg dithering."""
