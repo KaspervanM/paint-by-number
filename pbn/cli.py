@@ -2,7 +2,7 @@ from PIL import Image
 import argparse
 import pathlib
 
-from pbn.algorithms import AlgorithmEnum, ALGORITHM_MAP
+from pbn.quantization_algorithms import QAEnum, QA_MAP
 from pbn.output import resolve_output_path
 from pbn.palette import load_palette
 from pbn.core import PaintByNumber
@@ -28,10 +28,10 @@ def main() -> None:
     parser.add_argument(
         "--algorithm",
         "-a",
-        type=AlgorithmEnum,
-        choices=list(AlgorithmEnum),
-        default=AlgorithmEnum.FLOYD_STEINBERG,
-        help="Color quantization algorithm to use.",
+        type=QAEnum,
+        choices=list(map(lambda x: x.value, QAEnum)),
+        default=QAEnum.NEAREST,
+        help=f"Color quantization algorithm to use. Default: {QAEnum.NEAREST}.",
     )
     parser.add_argument(
         "--dir",
@@ -48,29 +48,31 @@ def main() -> None:
     )
 
     args = parser.parse_args()
-    image_path = args.input_image
-    palette_path = args.palette
-    output_dir = args.dir
-    output_file = args.output
+    image_path = args.input_image.resolve()
+    palette_path = args.palette.resolve()
+    qa_name = args.algorithm
+    output_dir = args.dir.resolve()
+    output_file = args.output.resolve() if args.output else None
 
-    if not output_dir.exists():
-        raise FileNotFoundError(f"Output directory does not exist: {output_dir}")
     if not output_dir.is_dir():
-        raise NotADirectoryError(f"Specified --dir is not a directory: {output_dir}")
+        raise NotADirectoryError(f"{output_dir} does not exist or is not a directory")
     if output_file:
         parent_dir = output_file.parent
         if not parent_dir.exists():
             raise FileNotFoundError(f"Directory for output file does not exist: {parent_dir}")
 
-    image = Image.open(image_path)
-    palette = load_palette(palette_path)
-    algorithm = FloydSteinbergDithering()
-    pbn = PaintByNumber(palette, algorithm)
-    result = pbn.process(image)
+    with Image.open(image_path) as image:
+        palette = load_palette(palette_path)
+        quantization_algorithm = QA_MAP[qa_name]()
+        pbn = PaintByNumber(palette, quantization_algorithm)
+        result = pbn.process(image)
 
-    output_path = resolve_output_path(image_path, palette_path, algorithm, output_dir, output_file)
+        output_path = resolve_output_path(
+            image_path, palette_path, qa_name, quantization_algorithm.params, output_dir, output_file
+        )
 
-    result.save(output_path, format="PPM")
+        result.save(output_path, format="PPM")
+        print(f"Saved output image to: {output_path}")
 
 
 if __name__ == "__main__":

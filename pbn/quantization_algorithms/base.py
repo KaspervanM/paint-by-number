@@ -9,8 +9,6 @@ from pbn.datatypes import Color
 class ColorQuantizationAlgorithm(ABC):
     """Protocol for color quantization algorithms."""
 
-    name: str = "BaseAlgorithm"
-
     params: Dict[str, Any] = {}
 
     @abstractmethod

@@ -1,14 +1,12 @@
 from typing import List
 from PIL import Image
 
-from pbn.quantization_algorithms import ColorQuantizationAlgorithm
+from .base import ColorQuantizationAlgorithm
 from pbn.datatypes import Color
 
 
 class FloydSteinbergDithering(ColorQuantizationAlgorithm):
     """Color quantization using Floyd-Steinberg error diffusion dithering."""
-
-    name: str = "FloydSteinbergDithering"
 
     def quantize(self, image: Image.Image, palette: List[Color]) -> Image.Image:
         """Quantize an image to the palette using Floyd-Steinberg dithering."""
