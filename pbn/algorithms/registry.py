@@ -4,7 +4,7 @@ from .floyd_steinberg import FloydSteinbergDithering
 from .nearest import NearestColorQuantization
 
 
-class QAEnum(str, Enum):
+class AlgorithmEnum(str, Enum):
     """Quantization Algorithm Enum"""
 
     NEAREST = "nearest"
@@ -12,7 +12,7 @@ class QAEnum(str, Enum):
 
 
 """Quantization Algorithm Map"""
-QA_MAP = {
-    QAEnum.NEAREST: NearestColorQuantization,
-    QAEnum.FLOYD_STEINBERG: FloydSteinbergDithering,
+ALGORITHM_MAP = {
+    AlgorithmEnum.NEAREST: NearestColorQuantization,
+    AlgorithmEnum.FLOYD_STEINBERG: FloydSteinbergDithering,
 }

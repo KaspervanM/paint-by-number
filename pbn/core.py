@@ -1,7 +1,7 @@
 from typing import List
 from PIL import Image
 
-from pbn.quantization_algorithms import ColorQuantizationAlgorithm
+from pbn.algorithms import ColorQuantizationAlgorithm
 from pbn.datatypes import Color
 
 

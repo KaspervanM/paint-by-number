@@ -2,10 +2,9 @@ from PIL import Image
 import argparse
 import pathlib
 
-from pbn.quantization_algorithms import QAEnum, QA_MAP
+from pbn.algorithms import AlgorithmEnum, ALGORITHM_MAP
 from pbn.output import resolve_output_path
-from pbn.palette import load_palette
-from pbn.core import PaintByNumber
+from pbn import PaintByNumber, load_palette
 
 
 def main() -> None:
@@ -28,10 +27,10 @@ def main() -> None:
     parser.add_argument(
         "--algorithm",
         "-a",
-        type=QAEnum,
-        choices=list(map(lambda x: x.value, QAEnum)),
-        default=QAEnum.NEAREST,
-        help=f"Color quantization algorithm to use. Default: {QAEnum.NEAREST}.",
+        type=AlgorithmEnum,
+        choices=list(map(lambda x: x.value, AlgorithmEnum)),
+        default=AlgorithmEnum.NEAREST,
+        help=f"Color quantization algorithm to use. Default: {AlgorithmEnum.NEAREST}.",
     )
     parser.add_argument(
         "--dir",
@@ -63,7 +62,7 @@ def main() -> None:
 
     with Image.open(image_path) as image:
         palette = load_palette(palette_path)
-        quantization_algorithm = QA_MAP[qa_name]()
+        quantization_algorithm = ALGORITHM_MAP[qa_name]()
         pbn = PaintByNumber(palette, quantization_algorithm)
         result = pbn.process(image)
 

@@ -1,11 +1,11 @@
 from .floyd_steinberg import FloydSteinbergDithering
-from .registry import QAEnum, QA_MAP
+from .registry import AlgorithmEnum, ALGORITHM_MAP
 from .nearest import NearestColorQuantization
 from .base import ColorQuantizationAlgorithm
 
 __all__ = [
-    "QAEnum",
-    "QA_MAP",
+    "AlgorithmEnum",
+    "ALGORITHM_MAP",
     "ColorQuantizationAlgorithm",
     "NearestColorQuantization",
     "FloydSteinbergDithering",
