@@ -48,12 +48,12 @@ class NearestColorQuantization(ColorQuantizationAlgorithm):
 
 
 class FloydSteinbergDithering(ColorQuantizationAlgorithm):
-    """Color quantization using Floyd–Steinberg error diffusion dithering."""
+    """Color quantization using Floyd-Steinberg error diffusion dithering."""
 
     name: str = "FloydSteinbergDithering"
 
     def quantize(self, image: Image.Image, palette: List[Color]) -> Image.Image:
-        """Quantize an image to the palette using Floyd–Steinberg dithering."""
+        """Quantize an image to the palette using Floyd-Steinberg dithering."""
         image = image.convert("RGB")
         pixels = image.load()
         width, height = image.size
@@ -123,7 +123,7 @@ def make_output_filename(
     parts = [input_path.stem, palette_path.stem, algorithm.name]
     if params_str:
         parts.append(params_str)
-    filename = "_".join(parts) + input_path.suffix
+    filename = "_".join(parts) + ".ppm"
     return filename
 
 
@@ -162,13 +162,13 @@ def main(
 
     output_path = resolve_output_path(image_path, palette_path, algorithm, output_dir, output_file)
 
-    result.save(output_path)
+    result.save(output_path, format="PPM")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         prog="pbn",
-        description="Paint by Number",
+        description="Paint by Number is under development. Currently, it takes an input image and quantizes it according to the provided palette. The resulting image is PPM format.",
         epilog="Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0",
     )
     parser.add_argument(
