@@ -1,7 +1,6 @@
 from enum import Enum
 
-from .floyd_steinberg import FloydSteinbergDithering
-from .nearest import NearestColorQuantization
+from .quantization import NearestColorQuantization, FloydSteinbergDithering
 
 
 class AlgorithmEnum(str, Enum):
