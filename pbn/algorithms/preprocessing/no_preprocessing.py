@@ -1,4 +1,4 @@
-from typing import List, Optional, cast, Tuple
+from typing import List, Optional
 from PIL import Image
 
 from .base import ImageProcessingAlgorithm
