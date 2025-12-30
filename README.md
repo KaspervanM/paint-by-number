@@ -36,7 +36,7 @@ pbn images/my_image.png palettes/my_palette.txt
 
 For development, you could use:
 
-```python
+```bash
 python3 -m pbn.cli images/my_image.png palettes/my_palette.txt
 ```
 
