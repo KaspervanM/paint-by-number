@@ -64,6 +64,9 @@ I plan to implement segmentation algorithms to get one step closer to a true pai
 - K-means / clustering with spatial regularization
 - Watershed segmentation
 - Superpixels
+- region growing
+- graph cuts
+- contour tracing
 
 And then apply the palette color closest the average color of each segment.
 
