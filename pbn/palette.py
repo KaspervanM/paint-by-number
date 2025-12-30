@@ -1,16 +1,21 @@
-from typing import List
 import pathlib
 
-from pbn.datatypes import Color
+from pbn.datatypes import Palette
 
 
-def load_palette(path: pathlib.Path) -> List[Color]:
+def load_palette(path: pathlib.Path) -> Palette:
     """Load a color palette from a text file of R,G,B lines."""
-    colors: List[Color] = []
+    palette: Palette = []
     with path.open() as f:
         for line in f:
             line = line.strip()
             if not line:
                 continue
-            colors.append(tuple(map(int, line.split(","))))
-    return colors
+            parts = line.split(",")
+            if len(parts) != 3:
+                raise ValueError(f"Invalid color line: '{line}'. Must have exactly 3 values.")
+
+            r_str, g_str, b_str = parts
+            r, g, b = int(r_str), int(g_str), int(b_str)
+            palette.append((r, g, b))
+    return palette

@@ -8,7 +8,7 @@ from .base import ImageSegmentationAlgorithm
 class GridSegmentation(ImageSegmentationAlgorithm):
     """Segments an image into a regular grid of square pixel blocks."""
 
-    def __init__(self, cell_size: int = 1):
+    def __init__(self, cell_size: int):
         """Initialize grid segmentation with a given square cell size."""
         if cell_size < 1:
             raise ValueError("cell_size must be >= 1")

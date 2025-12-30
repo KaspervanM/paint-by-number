@@ -1,6 +1,8 @@
 from typing import Dict, Any
 import pathlib
 
+from pbn.datatypes import PipelineRun, PipelineStageEnum
+
 
 def serialize_params(params: Dict[str, Any]) -> str:
     """Serialize algorithm parameters into a filename-friendly string."""
@@ -14,23 +16,48 @@ def serialize_params(params: Dict[str, Any]) -> str:
     return "_".join(parts)
 
 
-def make_output_filename(
-    input_path: pathlib.Path,
-    palette_path: pathlib.Path,
-    pre_name: str,
-    pre_params: Dict[str, Any],
-    seg_name: str,
-    seg_params: Dict[str, Any],
-    assign_name: str,
-    assign_params: Dict[str, Any],
-) -> str:
+def make_intermediate_filename(pipeline_run: PipelineRun, stage: PipelineStageEnum, notes: str = "") -> str:
+    """Generate a descriptive filename for an intermediate stage."""
+    parts = [pipeline_run.input_path.stem, pipeline_run.palette_path.stem, stage]
+
+    if notes:
+        parts.append(notes)
+
+    if pipeline_run.preprocessing_algorithm:
+        parts.append(pipeline_run.preprocessing_algorithm)
+    if pipeline_run.preprocessing_params:
+        parts.append(serialize_params(pipeline_run.preprocessing_params))
+
+    match stage:
+        case PipelineStageEnum.PREPROCESSING:
+            pass
+        case PipelineStageEnum.SEGMENTATION:
+            if pipeline_run.segmentation_algorithm:
+                parts.append(pipeline_run.segmentation_algorithm)
+            if pipeline_run.segmentation_params:
+                parts.append(serialize_params(pipeline_run.segmentation_params))
+        case _:
+            raise ValueError("Unsupported stage.")
+
+    return "_".join(parts) + ".ppm"
+
+
+def resolve_intermediate_path(pipeline_run: PipelineRun, stage: PipelineStageEnum, notes: str = "") -> pathlib.Path:
+    """Determine final output path, auto-generated in a directory."""
+    if not pipeline_run.intermediate_dir:
+        raise RuntimeError("An intermediate image path cannot be created without a provided directory.")
+
+    return pipeline_run.intermediate_dir / make_intermediate_filename(pipeline_run, stage, notes)
+
+
+def make_output_filename(pipeline_run: PipelineRun) -> str:
     """Create a descriptive output filename based on input, palette, algorithms, and parameters."""
-    parts = [input_path.stem, palette_path.stem]
+    parts = [pipeline_run.input_path.stem, pipeline_run.palette_path.stem]
 
     for name, params in [
-        (pre_name, pre_params),
-        (seg_name, seg_params),
-        (assign_name, assign_params),
+        (pipeline_run.preprocessing_algorithm, pipeline_run.preprocessing_params),
+        (pipeline_run.segmentation_algorithm, pipeline_run.segmentation_params),
+        (pipeline_run.assignment_algorithm, pipeline_run.assignment_params),
     ]:
         if name:
             parts.append(name)
@@ -41,19 +68,6 @@ def make_output_filename(
     return filename
 
 
-def resolve_output_path(
-    input_path: pathlib.Path,
-    palette_path: pathlib.Path,
-    pre_name: str,
-    pre_params: Dict[str, Any],
-    seg_name: str,
-    seg_params: Dict[str, Any],
-    assign_name: str,
-    assign_params: Dict[str, Any],
-    output_dir: pathlib.Path,
-) -> pathlib.Path:
+def resolve_output_path(pipeline_run: PipelineRun, output_dir: pathlib.Path) -> pathlib.Path:
     """Determine final output path, auto-generated in a directory."""
-    filename = make_output_filename(
-        input_path, palette_path, pre_name, pre_params, seg_name, seg_params, assign_name, assign_params
-    )
-    return output_dir / filename
+    return output_dir / make_output_filename(pipeline_run)

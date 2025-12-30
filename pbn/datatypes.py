@@ -1,8 +1,58 @@
 from __future__ import annotations
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Optional
 from dataclasses import dataclass, field
+from enum import Enum
+from PIL import Image
+import pathlib
 
 Color = Tuple[int, int, int]
+
+Palette = List[Color]
+
+
+class PipelineStageEnum(str, Enum):
+    PREPROCESSING = "preprocessing"
+    SEGMENTATION = "segmentation"
+    COLOR_ASSINGMENT = "color-assignment"
+
+
+class PreprocessingEnum(str, Enum):
+    """Preprocessing Algorithm Enum"""
+
+    NONE = "no-preprocessing"
+    FLOYD_STEINBERG = "floyd-steinberg"
+
+
+class SegmentationEnum(str, Enum):
+    """Segmentation Algorithm Enum"""
+
+    GRID = "grid-segmentation"
+
+
+class AssignmentEnum(str, Enum):
+    """Assignment Algorithm Enum"""
+
+    AVERAGE_NEAREST = "average-nearest"
+
+
+@dataclass
+class PipelineRun:
+    """Encapsulates all metadata and objects for a single PaintByNumber pipeline execution."""
+
+    input_path: pathlib.Path
+    original_image: Image.Image
+    palette_path: pathlib.Path
+
+    preprocessing_algorithm: PreprocessingEnum
+    preprocessing_params: Dict[str, Any]
+
+    segmentation_algorithm: SegmentationEnum
+    segmentation_params: Dict[str, Any]
+
+    assignment_algorithm: AssignmentEnum
+    assignment_params: Dict[str, Any]
+
+    intermediate_dir: Optional[pathlib.Path] = None
 
 
 @dataclass

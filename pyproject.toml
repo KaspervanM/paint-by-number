@@ -12,7 +12,9 @@ requires-python = ">=3.10"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 dependencies = [
-    "pillow>=12.0.0,<=12.99.99"
+    "pillow>=12.0.0,<=12.99.99",
+    "numpy>=2.4.0,<=2.99.99",
+    "scikit-image>=0.26.0,<=0.99.99"
 ]
 
 [project.scripts]

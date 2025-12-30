@@ -3,9 +3,10 @@ import argparse
 import pathlib
 from typing import Optional
 
-from pbn import PaintByNumber, load_palette
-from pbn.algorithms import PreprocessingEnum, SegmentationEnum, AssignmentEnum, ALGORITHM_MAP
+from pbn import PaintByNumber
+from pbn.algorithms import PreprocessingEnum, SegmentationEnum, AssignmentEnum
 from pbn.output import resolve_output_path
+from pbn.datatypes import PipelineRun
 
 
 def main() -> None:
@@ -35,7 +36,7 @@ def main() -> None:
         help="Segmentation algorithm to split the image into regions.",
     )
     parser.add_argument(
-        "-c",
+        "-a",
         "--assignment",
         type=AssignmentEnum,
         choices=[e.value for e in AssignmentEnum],
@@ -52,6 +53,11 @@ def main() -> None:
     parser.add_argument(
         "--output", "-o", type=pathlib.Path, help="Exact output file path. Overrides --dir if provided."
     )
+    parser.add_argument(
+        "--intermediate-images",
+        type=pathlib.Path,
+        help="Directory where to store intermediate images. For debugging or development purposes. If not provided, no intermediate images will be generated.",
+    )
 
     args = parser.parse_args()
 
@@ -59,42 +65,34 @@ def main() -> None:
     palette_path: pathlib.Path = args.palette.resolve()
     output_dir: pathlib.Path = args.dir.resolve()
     output_file: Optional[pathlib.Path] = args.output.resolve() if args.output else None
+    intermediate_dir: Optional[pathlib.Path] = args.intermediate_images.resolve() if args.intermediate_images else None
 
     if not output_dir.is_dir():
         raise NotADirectoryError(f"{output_dir} does not exist or is not a directory")
-    if output_file and not output_file.parent.exists():
-        raise FileNotFoundError(f"Directory for output file does not exist: {output_file.parent}")
+    if output_file and not output_file.parent.is_dir():
+        raise NotADirectoryError(f"{output_file.parent} does not exist or is not a directory")
+    if intermediate_dir and not intermediate_dir.is_dir():
+        raise NotADirectoryError(f"{intermediate_dir} does not exist or is not a directory")
 
     with Image.open(input_path) as image:
-        palette = load_palette(palette_path)
-        preprocessing = ALGORITHM_MAP[args.preprocessing]()
-        segmentation = ALGORITHM_MAP[args.segmentation]()
-        assignment = ALGORITHM_MAP[args.assignment]()
-
-        pbn = PaintByNumber(
-            palette=palette,
-            preprocessing=preprocessing,
-            segmentation=segmentation,
-            assignment=assignment,
+        pipeline_run = PipelineRun(
+            input_path=input_path,
+            original_image=image.copy(),
+            palette_path=palette_path,
+            preprocessing_algorithm=args.preprocessing,
+            preprocessing_params={},
+            segmentation_algorithm=args.segmentation,
+            segmentation_params={"cell_size": 30},
+            assignment_algorithm=args.assignment,
+            assignment_params={},
+            intermediate_dir=intermediate_dir,
         )
 
-        result = pbn.process(image)
+        pbn = PaintByNumber(pipeline_run)
 
-        output_path = (
-            resolve_output_path(
-                input_path,
-                palette_path,
-                args.preprocessing.value,
-                preprocessing.params,
-                args.segmentation.value,
-                segmentation.params,
-                args.assignment.value,
-                assignment.params,
-                output_dir,
-            )
-            if not output_file
-            else output_file
-        )
+        result = pbn.process()
+
+        output_path = resolve_output_path(pipeline_run, output_dir) if not output_file else output_file
 
         result.save(output_path, format="PPM")
         print(f"Saved output image to: {output_path}")

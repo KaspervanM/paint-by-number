@@ -45,7 +45,7 @@ But option 1 is recommended.
 ### Usage
 
 ```
-usage: pbn [-h] [-p {no-preprocessing,floyd-steinberg}] [-s {grid-segmentation}] [-c {average-nearest}] [--dir DIR] [--output OUTPUT] input_image palette
+usage: pbn [-h] [-p {no-preprocessing,floyd-steinberg}] [-s {grid-segmentation}] [-a {average-nearest}] [--dir DIR] [--output OUTPUT] [--intermediate-images INTERMEDIATE_IMAGES] input_image palette
 
 Paint by Number: Convert images to a palette-based representation. The resulting image is in PPM format.
 
@@ -59,10 +59,12 @@ options:
                         Preprocessing algorithm (optional).
   -s, --segmentation {grid-segmentation}
                         Segmentation algorithm to split the image into regions.
-  -c, --assignment {average-nearest}
+  -a, --assignment {average-nearest}
                         Color assignment algorithm to map palette colors to segments.
   --dir, -d DIR         Directory to save the output image. Default: current directory.
   --output, -o OUTPUT   Exact output file path. Overrides --dir if provided.
+  --intermediate-images INTERMEDIATE_IMAGES
+                        Directory where to store intermediate images. For debugging or development purposes. If not provided, no intermediate images will be generated.
 
 Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0
 ```
@@ -71,8 +73,8 @@ Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0
 
 The project is a work in progress. So far, only two quantization algorithms have been implemented:
 
-- nearest
-- Floyd-Steinberg
+- nearest (Not an explicit algorithm, but the default behaviour)
+- Floyd-Steinberg dithering
 
 I plan to implement segmentation algorithms to get one step closer to a true paint by number generator:
 
