@@ -40,16 +40,32 @@ For development, you could use:
 python3 -m pbn.cli images/my_image.png palettes/my_palette.txt
 ```
 
-But option 1 is preferred.
+But option 1 is recommended.
 
-### Options
+### Usage
 
-- `input_image` - Path to the image to convert
-- `palette` - Path to a palette file (R,G,B per line)
-- `--dir`, `-d` - Directory where the output will be saved (default: current working directory)
-- `--output`, `-o` - Exact output file path (overrides --dir)
-- `--algorithm`, `-a` - Algorithm to use (choices: nearest, floyd-steinberg)
-- `--help`, `-h` - Show program help
+```
+usage: pbn [-h] [-p {no-preprocessing,floyd-steinberg}] [-s {grid-segmentation}] [-c {average-nearest}] [--dir DIR] [--output OUTPUT] input_image palette
+
+Paint by Number: Convert images to a palette-based representation. The resulting image is in PPM format.
+
+positional arguments:
+  input_image           Path to the input image.
+  palette               Path to palette file (R,G,B per line).
+
+options:
+  -h, --help            show this help message and exit
+  -p, --preprocessing {no-preprocessing,floyd-steinberg}
+                        Preprocessing algorithm (optional).
+  -s, --segmentation {grid-segmentation}
+                        Segmentation algorithm to split the image into regions.
+  -c, --assignment {average-nearest}
+                        Color assignment algorithm to map palette colors to segments.
+  --dir, -d DIR         Directory to save the output image. Default: current directory.
+  --output, -o OUTPUT   Exact output file path. Overrides --dir if provided.
+
+Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0
+```
 
 ## Notes
 

@@ -1,10 +1,8 @@
-from .quantization import ColorQuantizationAlgorithm, NearestColorQuantization, FloydSteinbergDithering
-from .registry import AlgorithmEnum, ALGORITHM_MAP
+from .registry import PreprocessingEnum, SegmentationEnum, AssignmentEnum, ALGORITHM_MAP
 
 __all__ = [
-    "AlgorithmEnum",
+    "PreprocessingEnum",
+    "SegmentationEnum",
+    "AssignmentEnum",
     "ALGORITHM_MAP",
-    "ColorQuantizationAlgorithm",
-    "NearestColorQuantization",
-    "FloydSteinbergDithering",
 ]

@@ -1,17 +1,32 @@
 from enum import Enum
 
-from .quantization import NearestColorQuantization, FloydSteinbergDithering
+from .preprocessing import FloydSteinbergDithering, NoPreprocessing
+from .segmentation import GridSegmentation
+from .assignment import AverageNearestColorAssignment
 
 
-class AlgorithmEnum(str, Enum):
-    """Quantization Algorithm Enum"""
+class PreprocessingEnum(str, Enum):
+    """Preprocessing Algorithm Enum"""
 
-    NEAREST = "nearest"
+    NONE = "no-preprocessing"
     FLOYD_STEINBERG = "floyd-steinberg"
 
 
-"""Quantization Algorithm Map"""
+class SegmentationEnum(str, Enum):
+    """Segmentation Algorithm Enum"""
+
+    GRID = "grid-segmentation"
+
+
+class AssignmentEnum(str, Enum):
+    """Assignment Algorithm Enum"""
+
+    AVERAGE_NEAREST = "average-nearest"
+
+
 ALGORITHM_MAP = {
-    AlgorithmEnum.NEAREST: NearestColorQuantization,
-    AlgorithmEnum.FLOYD_STEINBERG: FloydSteinbergDithering,
+    PreprocessingEnum.NONE: NoPreprocessing,
+    PreprocessingEnum.FLOYD_STEINBERG: FloydSteinbergDithering,
+    SegmentationEnum.GRID: GridSegmentation,
+    AssignmentEnum.AVERAGE_NEAREST: AverageNearestColorAssignment,
 }
