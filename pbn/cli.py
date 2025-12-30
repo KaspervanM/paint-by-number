@@ -1,12 +1,48 @@
+from typing import Optional, Type, Tuple, Dict, Any, Callable
+from enum import Enum
 from PIL import Image
 import argparse
 import pathlib
-from typing import Optional
 
 from pbn import PaintByNumber
 from pbn.algorithms import PreprocessingEnum, SegmentationEnum, AssignmentEnum
 from pbn.output import resolve_output_path
 from pbn.datatypes import PipelineRun
+
+
+def parse_enum_with_params(enum_cls: Type[Enum]) -> Callable[[str], Tuple[Enum, Dict[str, Any]]]:
+    """The type that parses the algorithm with parameters provided over the CLI"""
+
+    def parser(value: str) -> Tuple[Enum, Dict[str, Any]]:
+        parts = value.split(",")
+        name = parts[0]
+
+        try:
+            enum_value = enum_cls(name)
+        except ValueError:
+            valid = ", ".join(e.value for e in enum_cls)
+            raise argparse.ArgumentTypeError(f"Invalid value '{name}'. Choose from: {valid}")
+
+        params: Dict[str, Any] = {}
+        for part in parts[1:]:
+            if "=" not in part:
+                raise argparse.ArgumentTypeError(f"Invalid parameter '{part}'. Expected key=value.")
+            val: str | int | float
+            key, val = part.split("=", 1)
+
+            if val.isdigit():
+                val = int(val)
+            else:
+                try:
+                    val = float(val)
+                except ValueError:
+                    pass
+
+            params[key] = val
+
+        return enum_value, params
+
+    return parser
 
 
 def main() -> None:
@@ -17,46 +53,56 @@ def main() -> None:
         epilog="Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0",
     )
 
-    parser.add_argument("input_image", type=pathlib.Path, help="Path to the input image.")
-    parser.add_argument("palette", type=pathlib.Path, help="Path to palette file (R,G,B per line).")
+    parser.add_argument("input_image", type=pathlib.Path, help="path to the input image")
+    parser.add_argument("palette", type=pathlib.Path, help="path to palette file (R,G,B per line)")
     parser.add_argument(
         "-p",
         "--preprocessing",
-        type=PreprocessingEnum,
-        choices=[e.value for e in PreprocessingEnum],
-        default=PreprocessingEnum.NONE,
-        help="Preprocessing algorithm (optional).",
+        type=parse_enum_with_params(PreprocessingEnum),
+        default=(PreprocessingEnum.NONE, {}),
+        help=(
+            "preprocessing algorithm and parameters. "
+            f"Options: {{{', '.join(e.value for e in PreprocessingEnum)}}}. "
+            "Default: nop"
+        ),
     )
     parser.add_argument(
         "-s",
         "--segmentation",
-        type=SegmentationEnum,
-        choices=[e.value for e in SegmentationEnum],
-        default=SegmentationEnum.GRID,
-        help="Segmentation algorithm to split the image into regions.",
+        type=parse_enum_with_params(SegmentationEnum),
+        default=(SegmentationEnum.GRID, {"cell_size": 1}),
+        help=(
+            "segmentation algorithm and parameters. "
+            f"Options: {{{', '.join(e.value for e in SegmentationEnum)}}}. "
+            "Default: grid,cell_size=1"
+        ),
     )
     parser.add_argument(
         "-a",
         "--assignment",
-        type=AssignmentEnum,
-        choices=[e.value for e in AssignmentEnum],
-        default=AssignmentEnum.AVERAGE_NEAREST,
-        help="Color assignment algorithm to map palette colors to segments.",
+        type=parse_enum_with_params(AssignmentEnum),
+        default=(AssignmentEnum.AVERAGE_NEAREST, {}),
+        help=(
+            "color assignment algorithm to map palette colors to segments. "
+            f"Options: {{{', '.join(e.value for e in AssignmentEnum)}}}. "
+            "Default: average-nearest"
+        ),
     )
     parser.add_argument(
         "--dir",
         "-d",
         type=pathlib.Path,
         default=pathlib.Path.cwd(),
-        help=f"Directory to save the output image. Default: current directory ({pathlib.Path.cwd()}).",
+        help="directory to save the output image. Default: current directory",
     )
     parser.add_argument(
-        "--output", "-o", type=pathlib.Path, help="Exact output file path. Overrides --dir if provided."
+        "--output", "-o", type=pathlib.Path, help="exact output file path and overrides --dir if provided"
     )
     parser.add_argument(
         "--intermediate-images",
         type=pathlib.Path,
-        help="Directory where to store intermediate images. For debugging or development purposes. If not provided, no intermediate images will be generated.",
+        help="enables storing intermediate images by providing directory where to store them",
+
     )
 
     args = parser.parse_args()
@@ -79,12 +125,12 @@ def main() -> None:
             input_path=input_path,
             original_image=image.copy(),
             palette_path=palette_path,
-            preprocessing_algorithm=args.preprocessing,
-            preprocessing_params={},
-            segmentation_algorithm=args.segmentation,
-            segmentation_params={"cell_size": 30},
-            assignment_algorithm=args.assignment,
-            assignment_params={},
+            preprocessing_algorithm=args.preprocessing[0],
+            preprocessing_params=args.preprocessing[1],
+            segmentation_algorithm=args.segmentation[0],
+            segmentation_params=args.segmentation[1],
+            assignment_algorithm=args.assignment[0],
+            assignment_params=args.assignment[1],
             intermediate_dir=intermediate_dir,
         )
 

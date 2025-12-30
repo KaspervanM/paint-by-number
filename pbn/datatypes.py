@@ -19,14 +19,14 @@ class PipelineStageEnum(str, Enum):
 class PreprocessingEnum(str, Enum):
     """Preprocessing Algorithm Enum"""
 
-    NONE = "no-preprocessing"
+    NONE = "nop"
     FLOYD_STEINBERG = "floyd-steinberg"
 
 
 class SegmentationEnum(str, Enum):
     """Segmentation Algorithm Enum"""
 
-    GRID = "grid-segmentation"
+    GRID = "grid"
 
 
 class AssignmentEnum(str, Enum):

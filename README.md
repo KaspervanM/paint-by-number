@@ -45,26 +45,26 @@ But option 1 is recommended.
 ### Usage
 
 ```
-usage: pbn [-h] [-p {no-preprocessing,floyd-steinberg}] [-s {grid-segmentation}] [-a {average-nearest}] [--dir DIR] [--output OUTPUT] [--intermediate-images INTERMEDIATE_IMAGES] input_image palette
+usage: pbn [-h] [-p PREPROCESSING] [-s SEGMENTATION] [-a ASSIGNMENT] [--dir DIR] [--output OUTPUT] [--intermediate-images INTERMEDIATE_IMAGES] input_image palette
 
 Paint by Number: Convert images to a palette-based representation. The resulting image is in PPM format.
 
 positional arguments:
-  input_image           Path to the input image.
-  palette               Path to palette file (R,G,B per line).
+  input_image           path to the input image
+  palette               path to palette file (R,G,B per line)
 
 options:
   -h, --help            show this help message and exit
-  -p, --preprocessing {no-preprocessing,floyd-steinberg}
-                        Preprocessing algorithm (optional).
-  -s, --segmentation {grid-segmentation}
-                        Segmentation algorithm to split the image into regions.
-  -a, --assignment {average-nearest}
-                        Color assignment algorithm to map palette colors to segments.
-  --dir, -d DIR         Directory to save the output image. Default: current directory.
-  --output, -o OUTPUT   Exact output file path. Overrides --dir if provided.
+  -p, --preprocessing PREPROCESSING
+                        preprocessing algorithm and parameters. Options: {nop, floyd-steinberg}. Default: nop
+  -s, --segmentation SEGMENTATION
+                        segmentation algorithm and parameters. Options: {grid}. Default: grid,cell_size=1
+  -a, --assignment ASSIGNMENT
+                        color assignment algorithm to map palette colors to segments. Options: {average-nearest}. Default: average-nearest
+  --dir, -d DIR         directory to save the output image. Default: current directory
+  --output, -o OUTPUT   exact output file path and overrides --dir if provided
   --intermediate-images INTERMEDIATE_IMAGES
-                        Directory where to store intermediate images. For debugging or development purposes. If not provided, no intermediate images will be generated.
+                        enables storing intermediate images by providing directory where to store them
 
 Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0
 ```
