@@ -2,22 +2,21 @@ from typing import List
 from PIL import Image
 import math
 
-from pbn.datatypes import Color, SegmentedImage, Segment
+from pbn.datatypes import Palette, Color, SegmentedImage, Segment
 from .base import ColorAssignmentAlgorithm
+from pbn.algorithms.enums import AssignmentEnum
 
 
 class AverageNearestColorAssignment(ColorAssignmentAlgorithm):
     """Assigns each segment the palette color closest to its average color."""
 
-    def __init__(self):
-        """Initialize average nearest color assignment."""
-        self.params = {}
+    name = AssignmentEnum.AVERAGE_NEAREST
 
     def assign_colors(
         self,
         image: Image.Image,
         segments: SegmentedImage,
-        palette: List[Color],
+        palette: Palette,
     ) -> Image.Image:
         """Compute average segment colors and assign nearest palette color."""
         image = image.convert("RGB")

@@ -1,9 +1,14 @@
 from __future__ import annotations
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any, Optional, TYPE_CHECKING
 from dataclasses import dataclass, field
 from enum import Enum
 from PIL import Image
 import pathlib
+
+if TYPE_CHECKING:
+    from pbn.algorithms import ImageProcessingAlgorithm
+    from pbn.algorithms import ImageSegmentationAlgorithm
+    from pbn.algorithms import ColorAssignmentAlgorithm
 
 Color = Tuple[int, int, int]
 
@@ -16,25 +21,6 @@ class PipelineStageEnum(str, Enum):
     COLOR_ASSINGMENT = "color-assignment"
 
 
-class PreprocessingEnum(str, Enum):
-    """Preprocessing Algorithm Enum"""
-
-    NONE = "nop"
-    FLOYD_STEINBERG = "floyd-steinberg"
-
-
-class SegmentationEnum(str, Enum):
-    """Segmentation Algorithm Enum"""
-
-    GRID = "grid"
-
-
-class AssignmentEnum(str, Enum):
-    """Assignment Algorithm Enum"""
-
-    AVERAGE_NEAREST = "average-nearest"
-
-
 @dataclass
 class PipelineRun:
     """Encapsulates all metadata and objects for a single PaintByNumber pipeline execution."""
@@ -43,14 +29,9 @@ class PipelineRun:
     original_image: Image.Image
     palette_path: pathlib.Path
 
-    preprocessing_algorithm: PreprocessingEnum
-    preprocessing_params: Dict[str, Any]
-
-    segmentation_algorithm: SegmentationEnum
-    segmentation_params: Dict[str, Any]
-
-    assignment_algorithm: AssignmentEnum
-    assignment_params: Dict[str, Any]
+    preprocessing: ImageProcessingAlgorithm
+    segmentation: ImageSegmentationAlgorithm
+    assignment: ColorAssignmentAlgorithm
 
     intermediate_dir: Optional[pathlib.Path] = None
 
@@ -75,7 +56,7 @@ class SegmentedImage:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_labels(cls, labels: List[List[int]]) -> "SegmentedImage":
+    def from_labels(cls, labels: List[List[int]]) -> SegmentedImage:
         """Create SegmentedImage from a 2D label map, generating Segment objects."""
         height = len(labels)
         width = len(labels[0]) if height > 0 else 0
@@ -89,7 +70,7 @@ class SegmentedImage:
         return cls(width=width, height=height, labels=labels, segments=segments)
 
     @classmethod
-    def from_segments(cls, segments: List[Segment], width: int, height: int) -> "SegmentedImage":
+    def from_segments(cls, segments: List[Segment], width: int, height: int) -> SegmentedImage:
         """Create SegmentedImage from Segment objects, generating the label map."""
         labels: List[List[int]] = [[-1 for _ in range(width)] for _ in range(height)]
         for seg in segments:

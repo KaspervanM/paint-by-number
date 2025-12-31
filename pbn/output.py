@@ -23,19 +23,17 @@ def make_intermediate_filename(pipeline_run: PipelineRun, stage: PipelineStageEn
     if notes:
         parts.append(notes)
 
-    if pipeline_run.preprocessing_algorithm:
-        parts.append(pipeline_run.preprocessing_algorithm)
-    if pipeline_run.preprocessing_params:
-        parts.append(serialize_params(pipeline_run.preprocessing_params))
+    parts.append(pipeline_run.preprocessing.name)
+    if pipeline_run.preprocessing.params:
+        parts.append(serialize_params(pipeline_run.preprocessing.params))
 
     match stage:
         case PipelineStageEnum.PREPROCESSING:
             pass
         case PipelineStageEnum.SEGMENTATION:
-            if pipeline_run.segmentation_algorithm:
-                parts.append(pipeline_run.segmentation_algorithm)
-            if pipeline_run.segmentation_params:
-                parts.append(serialize_params(pipeline_run.segmentation_params))
+            parts.append(pipeline_run.segmentation.name)
+            if pipeline_run.segmentation.params:
+                parts.append(serialize_params(pipeline_run.segmentation.params))
         case _:
             raise ValueError("Unsupported stage.")
 
@@ -55,12 +53,11 @@ def make_output_filename(pipeline_run: PipelineRun) -> str:
     parts = [pipeline_run.input_path.stem, pipeline_run.palette_path.stem]
 
     for name, params in [
-        (pipeline_run.preprocessing_algorithm, pipeline_run.preprocessing_params),
-        (pipeline_run.segmentation_algorithm, pipeline_run.segmentation_params),
-        (pipeline_run.assignment_algorithm, pipeline_run.assignment_params),
+        (pipeline_run.preprocessing.name, pipeline_run.preprocessing.params),
+        (pipeline_run.segmentation.name, pipeline_run.segmentation.params),
+        (pipeline_run.assignment.name, pipeline_run.assignment.params),
     ]:
-        if name:
-            parts.append(name)
+        parts.append(name)
         if params:
             parts.append(serialize_params(params))
 

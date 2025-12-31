@@ -3,12 +3,15 @@ from PIL import Image
 
 from pbn.datatypes import SegmentedImage, Segment
 from .base import ImageSegmentationAlgorithm
+from pbn.algorithms.enums import SegmentationEnum
 
 
-class GridSegmentation(ImageSegmentationAlgorithm):
+class GridImageSegmentation(ImageSegmentationAlgorithm):
     """Segments an image into a regular grid of square pixel blocks."""
 
-    def __init__(self, cell_size: int):
+    name = SegmentationEnum.GRID
+
+    def __init__(self, cell_size: int = 1):
         """Initialize grid segmentation with a given square cell size."""
         if cell_size < 1:
             raise ValueError("cell_size must be >= 1")
@@ -35,10 +38,14 @@ class GridSegmentation(ImageSegmentationAlgorithm):
                 segments.append(Segment(id=segment_id, pixels=pixels))
                 segment_id += 1
 
-        return SegmentedImage(
+        segmented = SegmentedImage(
             width=width,
             height=height,
             labels=labels,
             segments=segments,
             metadata={"type": "grid"},
         )
+        segmented.metadata.update(self.params)
+        segmented.metadata["algorithm"] = "grid"
+
+        return segmented

@@ -5,8 +5,10 @@ import argparse
 import pathlib
 
 from pbn import PaintByNumber
-from pbn.algorithms import PreprocessingEnum, SegmentationEnum, AssignmentEnum
+from pbn.algorithms import PreprocessingEnum, SegmentationEnum
 from pbn.output import resolve_output_path
+from pbn.algorithms import AssignmentEnum
+from pbn.algorithms import ALGORITHM_MAP
 from pbn.datatypes import PipelineRun
 
 
@@ -27,10 +29,12 @@ def parse_enum_with_params(enum_cls: Type[Enum]) -> Callable[[str], Tuple[Enum, 
         for part in parts[1:]:
             if "=" not in part:
                 raise argparse.ArgumentTypeError(f"Invalid parameter '{part}'. Expected key=value.")
-            val: str | int | float
+            val: str | int | float | None
             key, val = part.split("=", 1)
 
-            if val.isdigit():
+            if val == "None":
+                val = None
+            elif val.isdigit():
                 val = int(val)
             else:
                 try:
@@ -100,9 +104,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--intermediate-images",
+        "-i",
         type=pathlib.Path,
         help="enables storing intermediate images by providing directory where to store them",
-
     )
 
     args = parser.parse_args()
@@ -125,12 +129,9 @@ def main() -> None:
             input_path=input_path,
             original_image=image.copy(),
             palette_path=palette_path,
-            preprocessing_algorithm=args.preprocessing[0],
-            preprocessing_params=args.preprocessing[1],
-            segmentation_algorithm=args.segmentation[0],
-            segmentation_params=args.segmentation[1],
-            assignment_algorithm=args.assignment[0],
-            assignment_params=args.assignment[1],
+            preprocessing=ALGORITHM_MAP[args.preprocessing[0]](**args.preprocessing[1]),
+            segmentation=ALGORITHM_MAP[args.segmentation[0]](**args.segmentation[1]),
+            assignment=ALGORITHM_MAP[args.assignment[0]](**args.assignment[1]),
             intermediate_dir=intermediate_dir,
         )
 

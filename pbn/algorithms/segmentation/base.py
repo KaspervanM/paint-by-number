@@ -8,6 +8,7 @@ from pbn.datatypes import SegmentedImage
 class ImageSegmentationAlgorithm(ABC):
     """Abstract base class for image segmentation algorithms."""
 
+    name: str
     params: Dict[str, Any] = {}
 
     @abstractmethod

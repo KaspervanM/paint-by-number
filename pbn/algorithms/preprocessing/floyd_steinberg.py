@@ -2,14 +2,17 @@ from typing import List, Optional, cast, Tuple
 from PIL import Image
 import math
 
+from pbn.algorithms.enums import PreprocessingEnum
 from .base import ImageProcessingAlgorithm
-from pbn.datatypes import Color
+from pbn.datatypes import Palette, Color
 
 
 class FloydSteinbergDithering(ImageProcessingAlgorithm):
     """Color quantization using Floyd-Steinberg error diffusion dithering."""
 
-    def process(self, image: Image.Image, palette: Optional[List[Color]] = None) -> Image.Image:
+    name = PreprocessingEnum.FLOYD_STEINBERG
+
+    def process(self, image: Image.Image, palette: Optional[Palette] = None) -> Image.Image:
         """Transform the image. E.g. blur, dither. Palette is required only for palette-dependent algorithms like dithering."""
         if not palette:
             raise ValueError("Palette required for dithering.")

@@ -18,6 +18,8 @@ cd paint-by-number
 pip install -e .
 ```
 
+Run `pip install -e .[dev]` instead for development.
+
 Dependencies (currently just Pillow) will be installed automatically.
 
 ## Running the CLI
@@ -26,7 +28,7 @@ You can run the tool in several ways:
 
 ### 1. Using the installed console command
 
-After installing with `pip install -e .`:
+After installing with `pip install -e .` or `pip install -e .[dev]`:
 
 ```bash
 pbn images/my_image.png palettes/my_palette.txt
