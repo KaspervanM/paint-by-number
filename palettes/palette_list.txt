@@ -1,0 +1,120 @@
+101 White (RGB): #f5f7fb
+102 Cream (RGB): #f2f3b9
+103 Ivory (RGB): #f2f4e6
+104 Light Yellow Glaze (RGB): #feff5b
+105 Light Cadmium Yellow (RGB): #fefd5c
+106 Light Chrome Yellow (RGB): #fdf861
+107 Cadmium Yellow (RGB): #fef638
+108 Dark Cadmium Yellow (RGB): #f2b821
+109 Dark Chrome Yellow (RGB): #e9a041
+110 Phthalo Blue (RGB): #128de4
+111 Cadmium Orange (RGB): #e7884c
+112 Leaf Green (RGB): #17c743
+113 Orange Glaze (RGB): #ea5749
+115 Dark Cadmium Orange (RGB): #ea584a
+117 Light Cadmium red (RGB): #eb4e57
+118 Scarlet Red (RGB): #e03d5b
+119 Light Magenta (RGB): #df9ce4
+120 Ultramarine (RGB): #5d81ee
+121 Pale Geranium Lake (RGB): #e4335a
+123 Fuchsia (RGB): #db439f
+124 Rose Carmine (RGB): #e25c8a
+125 Middle Purple Pink (RGB): #d13da6
+126 Permanent Carmine (RGB): #d42758
+127 Pink Carmine (RGB): #dd4584
+128 Light Purple Pink (RGB): #e05bb1
+129 Pink Madder Lake (RGB): #e37ec2
+130 Dark Flesh (RGB): #e684a5
+131 Medium Flesh (RGB): #dd7b89
+132 Light Flesh (RGB): #e5bbb2
+133 Magenta (RGB): #aa4069
+134 Crimson (RGB): #b85bba
+135 Light Red-Violet (RGB): #a358a9
+136 Purple Violet (RGB): #7f4cc6
+137 Blue Violet (RGB): #6345c5
+138 Violet (RGB): #9f6dd8
+140 Light Ultramarine (RGB): #86adf8
+141 Delft Blue (RGB): #4835aa
+142 Madder (RGB): #ce4f77
+143 Cobalt Blue (RGB): #0a7dd5
+144 Cobalt Blue-Greenish (RGB): #0b70cb
+145 Light Phthalo Blue (RGB): #68bcf8
+146 Smalt Blue (RGB): #87b1f8
+149 Bluish Turquoise (RGB): #077dc0
+151 Helioblue-Reddish (RGB): #2579d4
+152 Middle Phthalo Blue (RGB): #0a91e7
+153 Cobalt Turquoise (RGB): #078eb0
+154 Light Cobalt Turquoise (RGB): #69d1e9
+155 Helio Turquoise (RGB): #0d7f92
+156 Cobalt Green (RGB): #23bdc9
+157 Dark Indigo (RGB): #3c4b65
+158 Deep Cobalt Green (RGB): #177f71
+159 Hooker's Green (RGB): #2c9d68
+160 Manganese Violet (RGB): #9954b8
+161 Phthalo Green (RGB): #01ae8b
+162 Light Phthalo Green (RGB): #1ad396
+163 Emerald Green (RGB): #0cc98b
+165 Juniper Green (RGB): #43865f
+166 Grass Green (RGB): #6ad94e
+167 Permanent Green Olive (RGB): #67983b
+168 Earth Green Yellowish (RGB): #a6c565
+169 Caput Mortuum (RGB): #8c5156
+170 May Green (RGB): #bedb62
+171 Light Green (RGB): #9fe56a
+172 Earth Green (RGB): #879f85
+173 Olive Green Yellowish (RGB): #71724a
+174 Chrome Green Opaque (RGB): #738454
+175 Sepia (RGB): #5d5556
+176 Van Dyck Brown (RGB): #765e5b
+177 Walnut Brown (RGB): #655051
+178 Nougat (RGB): #947362
+179 Bistre (RGB): #8f6745
+180 Raw Umber (RGB): #a1713f
+181 Payne's Gray (RGB): #5f6168
+182 Brown Ochre (RGB): #af7a42
+183 Light Yellow Ochre (RGB): #e0b536
+184 Dark Naples Ochre (RGB): #f9e065
+185 Naples Yello (RGB): #fdee5e
+186 Terracotta (RGB): #d69f6a
+187 Burnt Ochre (RGB): #c6864f
+188 Sanguine (RGB): #c55948
+189 Cinnamon (RGB): #d59992
+190 Venetian Red (RGB): #cb6361
+191 Pompeian Red (RGB): #d35e70
+192 Indian Red (RGB): #a54851
+193 Burnt Carmine (RGB): #a24e6b
+194 Red-Violet (RGB): #904a6a
+199 Black (RGB): #4d4c51
+205 Cadmium Yellow Lemon (RGB): #f6fe4c
+217 Middle Cadmium Red (RGB): #c14149
+219 Deep Scarlet Red (RGB): #d92c56
+223 Deep Red (RGB): #de4f64
+225 Dark Red (RGB): #b03d4c
+226 Alizarin Crimson (RGB): #d42e64
+230 Cold Gray I (RGB): #d4dbe5
+231 Cold Gray II (RGB): #c8cfd8
+232 Cold Gray III (RGB): #a0a8b2
+233 Cold Gray IV (RGB): #97989d
+234 Cold Gray U (RGB): #8d8f95
+235 Cold Gray VI (RGB): #5d5e62
+246 Prussian Blue (RGB): #216da6
+247 Indanthrene Blue (RGB): #354491
+249 Mauve (RGB): #6f49c2
+250 Gold (RGB): #aba99f
+251 Silver (RGB): #b4bbc9
+252 Copper (RGB): #9e968f
+263 Caput Mortuum Violet (RGB): #83515a
+264 Dark Phthalo Green (RGB): #06a474
+266 Permanent Green (RGB): #0b9a3c
+267 Pine Green (RGB): #286d40
+268 Green Gold (RGB): #c7a539
+270 Warm Gray I (RGB): #d3d4d6
+271 Warm Gray II (RGB): #c7c7c7
+272 Warm Gray III (RGB): #a9a8a8
+273 Warm Gray IV (RGB): #7d7b7c
+274 Warm Gray V (RGB): #5c5a5d
+275 Warm Gray VI (RGB): #444346
+276 Chrome Oxide Green Fiery (RGB): #01a07c
+278 Chrome Oxide Green (RGB): #395d43
+280 Burnt Umber (RGB): #75554a
+283 Burnt Sienna (RGB): #8d6356

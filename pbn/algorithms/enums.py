@@ -14,6 +14,8 @@ class SegmentationEnum(str, Enum):
     GRID = "grid"
     VORONOI = "voronoi"
     KMEANS = "kmeans"
+    WATERSHED = "watershed"
+    LAB_WATERSHED= "lab_watershed"
 
 
 class AssignmentEnum(str, Enum):

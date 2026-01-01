@@ -1,0 +1,11 @@
+255,247,255   # titaanwit
+173,115,34    # gele oker
+255,215,0     # primair geel
+169,26,49     # primair magenta
+0,63,130      # primair cyaan
+70,56,54      # omber gebrand
+30,29,31      # carbon zwart
+250,218,94    # napelsgeel rood
+64,56,54      # omber naturel
+0,31,41       # phtalogroen
+131,81,90     # caput mortuum violet

@@ -29,11 +29,15 @@ def parse_enum_with_params(enum_cls: Type[Enum]) -> Callable[[str], Tuple[Enum, 
         for part in parts[1:]:
             if "=" not in part:
                 raise argparse.ArgumentTypeError(f"Invalid parameter '{part}'. Expected key=value.")
-            val: str | int | float | None
+            val: str | int | float | bool | None
             key, val = part.split("=", 1)
 
             if val == "None":
                 val = None
+            elif val.lower() == "true":
+                val = True
+            elif val.lower() == "false":
+                val = False
             elif val.isdigit():
                 val = int(val)
             else:
