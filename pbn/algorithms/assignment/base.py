@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from PIL import Image
 from typing import Any, Dict
 
-from pbn.datatypes import Palette
+from pbn.datatypes import Palette, SegmentedImage, ColoredSegmentedImage
 
 
 class ColorAssignmentAlgorithm(ABC):
@@ -12,6 +12,6 @@ class ColorAssignmentAlgorithm(ABC):
     params: Dict[str, Any] = {}
 
     @abstractmethod
-    def assign_colors(self, image: Image.Image, segments: Any, palette: Palette) -> Image.Image:
+    def assign_colors(self, image: Image.Image, segments: SegmentedImage, palette: Palette) -> ColoredSegmentedImage:
         """Assign a color from the palette to each segment and render."""
         pass

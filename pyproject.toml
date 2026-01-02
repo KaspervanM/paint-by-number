@@ -16,8 +16,7 @@ dependencies = [
     "numpy>=2.4.0,<3.0.0",
     "scikit-image>=0.26.0,<1.0.0",
     "scikit-learn>=1.8.0,<2.0.0",
-    "scipy>=1.16.3,<2.0.0",
-    "opencv-python>=4.12.0.88,<5.0.0.0"
+    "scipy>=1.16.3,<2.0.0"
 ]
 
 [project.optional-dependencies]
@@ -33,3 +32,11 @@ packages = ["pbn"]
 
 [tool.mypy]
 ignore_missing_imports = true
+warn_unused_configs = true
+strict = true
+check_untyped_defs = true
+
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+warn_unused_ignores = true
+warn_redundant_casts = true

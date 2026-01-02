@@ -27,15 +27,18 @@ def make_intermediate_filename(pipeline_run: PipelineRun, stage: PipelineStageEn
     if pipeline_run.preprocessing.params:
         parts.append(serialize_params(pipeline_run.preprocessing.params))
 
-    match stage:
-        case PipelineStageEnum.PREPROCESSING:
-            pass
-        case PipelineStageEnum.SEGMENTATION:
-            parts.append(pipeline_run.segmentation.name)
-            if pipeline_run.segmentation.params:
-                parts.append(serialize_params(pipeline_run.segmentation.params))
-        case _:
-            raise ValueError("Unsupported stage.")
+    if stage in (PipelineStageEnum.SEGMENTATION, PipelineStageEnum.POSTPROCESSING):
+        parts.append(pipeline_run.segmentation.name)
+        if pipeline_run.segmentation.params:
+            parts.append(serialize_params(pipeline_run.segmentation.params))
+
+    if stage == PipelineStageEnum.POSTPROCESSING:
+        parts.append(pipeline_run.postprocessing.name)
+        if pipeline_run.postprocessing.params:
+            parts.append(serialize_params(pipeline_run.postprocessing.params))
+
+    if stage == PipelineStageEnum.COLOR_ASSINGMENT:
+        raise ValueError("Unsupported stage.")
 
     return "_".join(parts) + ".ppm"
 
@@ -55,6 +58,7 @@ def make_output_filename(pipeline_run: PipelineRun) -> str:
     for name, params in [
         (pipeline_run.preprocessing.name, pipeline_run.preprocessing.params),
         (pipeline_run.segmentation.name, pipeline_run.segmentation.params),
+        (pipeline_run.postprocessing.name, pipeline_run.postprocessing.params),
         (pipeline_run.assignment.name, pipeline_run.assignment.params),
     ]:
         parts.append(name)

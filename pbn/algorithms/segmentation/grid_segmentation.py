@@ -15,7 +15,6 @@ class GridImageSegmentation(ImageSegmentationAlgorithm):
         """Initialize grid segmentation with a given square cell size."""
         if cell_size < 1:
             raise ValueError("cell_size must be >= 1")
-        self.cell_size = cell_size
         self.params = {"cell_size": cell_size}
 
     def segment(self, image: Image.Image) -> SegmentedImage:
@@ -26,26 +25,20 @@ class GridImageSegmentation(ImageSegmentationAlgorithm):
         segments: List[Segment] = []
 
         segment_id = 0
-        for y0 in range(0, height, self.cell_size):
-            for x0 in range(0, width, self.cell_size):
+        for y0 in range(0, height, self.params["cell_size"]):
+            for x0 in range(0, width, self.params["cell_size"]):
                 pixels: List[Tuple[int, int]] = []
 
-                for y in range(y0, min(y0 + self.cell_size, height)):
-                    for x in range(x0, min(x0 + self.cell_size, width)):
+                for y in range(y0, min(y0 + self.params["cell_size"], height)):
+                    for x in range(x0, min(x0 + self.params["cell_size"], width)):
                         labels[y][x] = segment_id
                         pixels.append((x, y))
 
                 segments.append(Segment(id=segment_id, pixels=pixels))
                 segment_id += 1
 
-        segmented = SegmentedImage(
-            width=width,
-            height=height,
-            labels=labels,
-            segments=segments,
-            metadata={"type": "grid"},
-        )
-        segmented.metadata.update(self.params)
+        segmented = SegmentedImage.from_labels(labels)
         segmented.metadata["algorithm"] = "grid"
+        segmented.metadata.update(self.params)
 
         return segmented

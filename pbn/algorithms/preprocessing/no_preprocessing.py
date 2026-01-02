@@ -7,7 +7,7 @@ from pbn.datatypes import Palette
 
 
 class NoPreprocessing(ImageProcessingAlgorithm):
-    """Color quantization using Floyd-Steinberg error diffusion dithering."""
+    """Used to skip the preprocessing stage."""
 
     name = PreprocessingEnum.NONE
 

@@ -1,28 +1,26 @@
 from typing import Optional, Type, Tuple, Dict, Any, Callable
-from enum import Enum
+from enum import StrEnum
 from PIL import Image
 import argparse
 import pathlib
 
-from pbn import PaintByNumber
-from pbn.algorithms import PreprocessingEnum, SegmentationEnum
+from pbn.algorithms import PreprocessingEnum, SegmentationEnum, PostprocessingEnum, AssignmentEnum, RenderingEnum, ALGORITHM_MAP
 from pbn.output import resolve_output_path
-from pbn.algorithms import AssignmentEnum
-from pbn.algorithms import ALGORITHM_MAP
 from pbn.datatypes import PipelineRun
+from pbn import PaintByNumber
 
 
-def parse_enum_with_params(enum_cls: Type[Enum]) -> Callable[[str], Tuple[Enum, Dict[str, Any]]]:
+def parse_enum_with_params(enum_cls: Type[StrEnum]) -> Callable[[str], Tuple[StrEnum, Dict[str, Any]]]:
     """The type that parses the algorithm with parameters provided over the CLI"""
 
-    def parser(value: str) -> Tuple[Enum, Dict[str, Any]]:
+    def parser(value: str) -> Tuple[StrEnum, Dict[str, Any]]:
         parts = value.split(",")
         name = parts[0]
 
         try:
             enum_value = enum_cls(name)
         except ValueError:
-            valid = ", ".join(e.value for e in enum_cls)
+            valid = ", ".join(e for e in enum_cls)
             raise argparse.ArgumentTypeError(f"Invalid value '{name}'. Choose from: {valid}")
 
         params: Dict[str, Any] = {}
@@ -70,7 +68,7 @@ def main() -> None:
         default=(PreprocessingEnum.NONE, {}),
         help=(
             "preprocessing algorithm and parameters. "
-            f"Options: {{{', '.join(e.value for e in PreprocessingEnum)}}}. "
+            f"Options: {{{', '.join(e for e in PreprocessingEnum)}}}. "
             "Default: nop"
         ),
     )
@@ -81,7 +79,7 @@ def main() -> None:
         default=(SegmentationEnum.GRID, {"cell_size": 1}),
         help=(
             "segmentation algorithm and parameters. "
-            f"Options: {{{', '.join(e.value for e in SegmentationEnum)}}}. "
+            f"Options: {{{', '.join(e for e in SegmentationEnum)}}}. "
             "Default: grid,cell_size=1"
         ),
     )
@@ -92,8 +90,30 @@ def main() -> None:
         default=(AssignmentEnum.AVERAGE_NEAREST, {}),
         help=(
             "color assignment algorithm to map palette colors to segments. "
-            f"Options: {{{', '.join(e.value for e in AssignmentEnum)}}}. "
+            f"Options: {{{', '.join(e for e in AssignmentEnum)}}}. "
             "Default: average-nearest"
+        ),
+    )
+    parser.add_argument(
+        "-t",
+        "--postprocessing",
+        type=parse_enum_with_params(PostprocessingEnum),
+        default=(PostprocessingEnum.MERGE, {}),
+        help=(
+            "segmentation postprocessing algorithm and parameters. "
+            f"Options: {{{', '.join(e for e in PostprocessingEnum)}}}. "
+            "Default: merge"
+        ),
+    )
+    parser.add_argument(
+        "-r",
+        "--rendering",
+        type=parse_enum_with_params(RenderingEnum),
+        default=(RenderingEnum.COLORED, {}),
+        help=(
+            "rendering algorithm to render segments. E.g. colored image or numbered image. "
+            f"Options: {{{', '.join(e for e in RenderingEnum)}}}. "
+            "Default: color"
         ),
     )
     parser.add_argument(
@@ -135,7 +155,9 @@ def main() -> None:
             palette_path=palette_path,
             preprocessing=ALGORITHM_MAP[args.preprocessing[0]](**args.preprocessing[1]),
             segmentation=ALGORITHM_MAP[args.segmentation[0]](**args.segmentation[1]),
+            postprocessing=ALGORITHM_MAP[args.postprocessing[0]](**args.postprocessing[1]),
             assignment=ALGORITHM_MAP[args.assignment[0]](**args.assignment[1]),
+            rendering=ALGORITHM_MAP[args.rendering[0]](**args.rendering[1]),
             intermediate_dir=intermediate_dir,
         )
 
@@ -143,9 +165,14 @@ def main() -> None:
 
         result = pbn.process()
 
+        if isinstance(result, Image.Image):
+            result_image = result
+        else:
+            result_image, color_map = result
+
         output_path = resolve_output_path(pipeline_run, output_dir) if not output_file else output_file
 
-        result.save(output_path, format="PPM")
+        result_image.save(output_path, format="PPM")
         print(f"Saved output image to: {output_path}")
 
 

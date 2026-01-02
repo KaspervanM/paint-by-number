@@ -1,23 +1,29 @@
 from __future__ import annotations
-from typing import List, Tuple, Dict, Any, Optional, TYPE_CHECKING
+from typing import List, Tuple, Dict, Any, Optional, Sequence, cast, TYPE_CHECKING
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from PIL import Image
+from abc import ABC
 import pathlib
 
 if TYPE_CHECKING:
-    from pbn.algorithms import ImageProcessingAlgorithm
-    from pbn.algorithms import ImageSegmentationAlgorithm
-    from pbn.algorithms import ColorAssignmentAlgorithm
+    from pbn.algorithms import (
+        ImageProcessingAlgorithm,
+        ImageSegmentationAlgorithm,
+        SegmentsProcessingAlgorithm,
+        ColorAssignmentAlgorithm,
+        SegmentRenderingAlgorithm,
+    )
 
 Color = Tuple[int, int, int]
 
 Palette = List[Color]
 
 
-class PipelineStageEnum(str, Enum):
+class PipelineStageEnum(StrEnum):
     PREPROCESSING = "preprocessing"
     SEGMENTATION = "segmentation"
+    POSTPROCESSING = "postprocessing"
     COLOR_ASSINGMENT = "color-assignment"
 
 
@@ -31,49 +37,115 @@ class PipelineRun:
 
     preprocessing: ImageProcessingAlgorithm
     segmentation: ImageSegmentationAlgorithm
+    postprocessing: SegmentsProcessingAlgorithm
     assignment: ColorAssignmentAlgorithm
+    rendering: SegmentRenderingAlgorithm
 
     intermediate_dir: Optional[pathlib.Path] = None
 
 
 @dataclass
 class Segment:
-    """Represents a single segment with pixels and optional metadata."""
+    """Represents a single segment with pixel coordinates."""
 
     id: int
     pixels: List[Tuple[int, int]]
-    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
-class SegmentedImage:
-    """Container for segmented images with both label map and segment objects."""
+class ColoredSegment(Segment):
+    """Represents a segment with an associated RGB color."""
+
+    color: Color
+
+
+@dataclass
+class BaseSegmentedImage(ABC):
+    """Base class for segmented images with common logic."""
 
     width: int
     height: int
-    labels: List[List[int]]
-    segments: List[Segment]
+    segments: Sequence[Segment]
+    labels: List[List[int]] = field(init=False)
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self):
+        """Check IDs, generate label map, and enforce no overlaps."""
+        self._check_unique_ids()
+        self._generate_labels()
+
+    def _check_unique_ids(self) -> None:
+        """Ensure all segment IDs are unique."""
+        ids = [seg.id for seg in self.segments]
+        if len(ids) != len(set(ids)):
+            raise ValueError("Duplicate segment IDs detected")
+
+    def _generate_labels(self) -> None:
+        """Generate label map and check for overlapping pixels."""
+        labels: List[List[int]] = [[-1 for _ in range(self.width)] for _ in range(self.height)]
+        for seg in self.segments:
+            for x, y in seg.pixels:
+                if labels[y][x] != -1:
+                    raise ValueError(f"Pixel ({x}, {y}) belongs to multiple segments")
+                labels[y][x] = seg.id
+        self.labels = labels
+
+
+@dataclass
+class SegmentedImage(BaseSegmentedImage):
+    """Container for standard segmented images with non-colored segments."""
 
     @classmethod
     def from_labels(cls, labels: List[List[int]]) -> SegmentedImage:
-        """Create SegmentedImage from a 2D label map, generating Segment objects."""
+        """Create SegmentedImage from a 2D label map."""
         height = len(labels)
         width = len(labels[0]) if height > 0 else 0
-
         segment_dict: Dict[int, List[Tuple[int, int]]] = {}
         for y, row in enumerate(labels):
             for x, seg_id in enumerate(row):
                 segment_dict.setdefault(seg_id, []).append((x, y))
-
         segments = [Segment(id=sid, pixels=pixels) for sid, pixels in segment_dict.items()]
-        return cls(width=width, height=height, labels=labels, segments=segments)
+        return cls(width=width, height=height, segments=segments)
 
     @classmethod
-    def from_segments(cls, segments: List[Segment], width: int, height: int) -> SegmentedImage:
-        """Create SegmentedImage from Segment objects, generating the label map."""
-        labels: List[List[int]] = [[-1 for _ in range(width)] for _ in range(height)]
-        for seg in segments:
-            for x, y in seg.pixels:
-                labels[y][x] = seg.id
-        return cls(width=width, height=height, labels=labels, segments=segments)
+    def from_segments(cls, segments: Sequence[Segment], width: int, height: int) -> SegmentedImage:
+        """Create SegmentedImage from Segment objects."""
+        return cls(width=width, height=height, segments=segments)
+
+
+@dataclass
+class ColoredSegmentedImage(BaseSegmentedImage):
+    """Container for segmented images with colored segments."""
+
+    segments: Sequence[ColoredSegment]
+
+    @classmethod
+    def from_segments(
+        cls,
+        segments: Sequence[ColoredSegment] | Sequence[Segment] | BaseSegmentedImage,
+        width: int,
+        height: int,
+        color_map: Optional[Dict[int, Color]] = None,
+    ) -> ColoredSegmentedImage:
+        """
+        Create ColoredSegmentedImage from ColoredSegment objects or Segment objects with a color_map.
+        """
+        if isinstance(segments, BaseSegmentedImage):
+            if isinstance(segments, SegmentedImage):
+                segments = segments.segments
+            elif isinstance(segments, ColoredSegmentedImage):
+                return segments
+            else:
+                raise TypeError()
+        if all(isinstance(seg, ColoredSegment) for seg in segments):
+            colored_segments: List[ColoredSegment] = list(cast(Sequence[ColoredSegment], segments))
+        else:
+            if color_map is None:
+                raise TypeError("Segments are not ColoredSegment. Must provide a color_map: Dict[segment_id, Color]")
+            colored_segments = []
+            for seg in segments:
+                if seg.id not in color_map:
+                    raise ValueError(f"No color provided for segment id {seg.id}")
+                colored_segments.append(ColoredSegment(id=seg.id, pixels=seg.pixels, color=color_map[seg.id]))
+
+        return cls(width=width, height=height, segments=colored_segments)

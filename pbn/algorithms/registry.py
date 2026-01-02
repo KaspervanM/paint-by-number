@@ -1,7 +1,9 @@
 from .preprocessing import FloydSteinbergDithering, NoPreprocessing
 from .segmentation import GridImageSegmentation, VoronoiImageSegmentation, KMeansImageSegmentation, WatershedImageSegmentation, LABWatershedSegmentation
+from .postprocessing import MergeSegments, NoPostprocessing
 from .assignment import AverageNearestColorAssignment
-from .enums import PreprocessingEnum, SegmentationEnum, AssignmentEnum
+from .rendering import ColoredRendering
+from .enums import PreprocessingEnum, SegmentationEnum, PostprocessingEnum, AssignmentEnum, RenderingEnum
 
 
 ALGORITHM_MAP = {
@@ -12,5 +14,8 @@ ALGORITHM_MAP = {
     SegmentationEnum.KMEANS: KMeansImageSegmentation,
     SegmentationEnum.WATERSHED: WatershedImageSegmentation,
     SegmentationEnum.LAB_WATERSHED: LABWatershedSegmentation,
+    PostprocessingEnum.NONE: NoPostprocessing,
+    PostprocessingEnum.MERGE: MergeSegments,
     AssignmentEnum.AVERAGE_NEAREST: AverageNearestColorAssignment,
+    RenderingEnum.COLORED: ColoredRendering,
 }

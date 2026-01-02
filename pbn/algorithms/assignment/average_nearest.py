@@ -1,8 +1,8 @@
-from typing import List
+from typing import List, Dict, Any
 from PIL import Image
 import math
 
-from pbn.datatypes import Palette, Color, SegmentedImage, Segment
+from pbn.datatypes import Palette, Color, SegmentedImage, Segment, ColoredSegmentedImage
 from .base import ColorAssignmentAlgorithm
 from pbn.algorithms.enums import AssignmentEnum
 
@@ -12,31 +12,8 @@ class AverageNearestColorAssignment(ColorAssignmentAlgorithm):
 
     name = AssignmentEnum.AVERAGE_NEAREST
 
-    def assign_colors(
-        self,
-        image: Image.Image,
-        segments: SegmentedImage,
-        palette: Palette,
-    ) -> Image.Image:
-        """Compute average segment colors and assign nearest palette color."""
-        image = image.convert("RGB")
-        src_pixels = image.load()
-
-        output = Image.new("RGB", (segments.width, segments.height))
-        out_pixels = output.load()
-        if out_pixels is None:
-            raise ValueError("Failed to load image pixels.")
-
-        for segment in segments.segments:
-            avg_color = self._average_color(segment, src_pixels)
-            assigned = self._nearest_color(avg_color, palette)
-
-            for x, y in segment.pixels:
-                out_pixels[x, y] = assigned
-
-        return output
-
-    def _average_color(self, segment: Segment, src_pixels) -> Color:
+    @staticmethod
+    def average_color(segment: Segment, src_pixels: Any) -> Color:
         """Compute average RGB color of a segment."""
         r = g = b = 0
         n = len(segment.pixels)
@@ -48,6 +25,28 @@ class AverageNearestColorAssignment(ColorAssignmentAlgorithm):
             b += pb
 
         return (r // n, g // n, b // n)
+
+    def assign_colors(
+        self,
+        image: Image.Image,
+        segments: SegmentedImage,
+        palette: Palette,
+    ) -> ColoredSegmentedImage:
+        """Compute average segment colors and assign nearest palette color."""
+        image = image.convert("RGB")
+        src_pixels = image.load()
+        if src_pixels is None:
+            raise ValueError("Failed to load image pixels.")
+
+        color_map: Dict[int, Color] = {}
+
+        for segment in segments.segments:
+            avg_color = self.average_color(segment, src_pixels)
+            assigned = self._nearest_color(avg_color, palette)
+
+            color_map[segment.id] = assigned
+
+        return ColoredSegmentedImage.from_segments(segments, image.width, image.height, color_map)
 
     def _nearest_color(self, color: Color, palette: List[Color]) -> Color:
         """Return palette color with minimal Euclidean distance."""
