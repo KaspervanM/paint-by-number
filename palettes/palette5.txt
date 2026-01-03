@@ -1,0 +1,13 @@
+#f2f4e6  # Ivory
+#e0b536  # Light Yellow Ochre
+#eb4e57  # Light Cadmium red
+#67983b  # Permanent Green Olive
+#a6c565  # Earth Green Yellowish
+#5d5556  # Sepia
+#01ae8b  # Phthalo Green
+#354491  # Indanthrene Blue
+#97989d  # Cold Gray IV
+#0a91e7  # Middle Phthalo Blue
+#286d40  # Pine Green
+#947362  # Nougat
+#655051  # Walnut Brown
