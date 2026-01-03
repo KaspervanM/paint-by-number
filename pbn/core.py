@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict, Tuple, List
 from PIL import Image
 import pathlib
 import numpy as np
@@ -11,6 +11,7 @@ from pbn.algorithms import (
     ColorAssignmentAlgorithm,
     SegmentRenderingAlgorithm,
     PreprocessingEnum,
+    PostprocessingEnum,
 )
 from pbn.algorithms.assignment import AverageNearestColorAssignment
 from pbn.algorithms.rendering import ColoredRendering
@@ -24,9 +25,9 @@ class PaintByNumber:
 
     pipeline_run: PipelineRun
     palette: Palette
-    preprocessing: ImageProcessingAlgorithm
+    preprocessing: List[ImageProcessingAlgorithm]
     segmentation: ImageSegmentationAlgorithm
-    postprocessing: SegmentsProcessingAlgorithm
+    postprocessing: List[SegmentsProcessingAlgorithm]
     assignment: ColorAssignmentAlgorithm
     rendering: SegmentRenderingAlgorithm
     intermediate_dir: Optional[pathlib.Path]
@@ -45,57 +46,72 @@ class PaintByNumber:
     def process(self) -> Image.Image | Tuple[Image.Image, Dict[int, Color]]:
         """Run the full pipeline on the input image and return the processed image."""
         image = self.pipeline_run.original_image.copy()
-        preprocessed_image = self.preprocessing.process(image, palette=self.palette)
 
-        if self.intermediate_dir and self.preprocessing.name != PreprocessingEnum.NONE:
-            output_path = resolve_intermediate_path(self.pipeline_run, PipelineStageEnum.PREPROCESSING)
-            preprocessed_image.save(output_path)
-            print(f"Saved intermediate image to: {output_path}")
+        preprocessed_image = image.copy()
+
+        for step, preprocessing_algo in enumerate(self.preprocessing):
+            preprocessed_image = preprocessing_algo.process(preprocessed_image, self.palette)
+
+            if self.intermediate_dir and preprocessing_algo.name != PreprocessingEnum.NONE:
+                output_path = resolve_intermediate_path(self.pipeline_run, PipelineStageEnum.PREPROCESSING, step)
+                preprocessed_image.save(output_path)
+                print(f"Saved intermediate image to: {output_path}")
 
         segments = self.segmentation.segment(preprocessed_image)
 
         if self.intermediate_dir:
-            self._save_intermediate_segments(PipelineStageEnum.SEGMENTATION, image, preprocessed_image, segments)
+            self._save_intermediate_segments(
+                PipelineStageEnum.SEGMENTATION, self.segmentation.name, image, preprocessed_image, segments
+            )
 
         colored_segments = self.assignment.assign_colors(preprocessed_image, segments, self.palette)
 
-        processed_segments = self.postprocessing.process(colored_segments)
+        processed_segments = colored_segments.copy()
 
-        if self.intermediate_dir:
-            self._save_intermediate_segments(
-                PipelineStageEnum.POSTPROCESSING, image, preprocessed_image, processed_segments
-            )
-        
+        for step, postprocessing_algo in enumerate(self.postprocessing):
+            processed_segments = postprocessing_algo.process(processed_segments, self.palette)
+
+            if self.intermediate_dir and postprocessing_algo.name != PostprocessingEnum.NONE:
+                self._save_intermediate_segments(
+                    PipelineStageEnum.POSTPROCESSING,
+                    postprocessing_algo.name,
+                    image,
+                    preprocessed_image,
+                    processed_segments,
+                    step,
+                )
+
         rendering_output = self.rendering.render(processed_segments)
         return rendering_output
 
     def _save_intermediate_segments(
         self,
         stage: PipelineStageEnum,
+        algorithm_name: str,
         base_image: Image.Image,
         preprocessed_image: Image.Image,
         segments: BaseSegmentedImage,
+        step: int = 0,
     ) -> None:
-        output_path = resolve_intermediate_path(self.pipeline_run, stage, "boundary-mask")
+        output_path = resolve_intermediate_path(self.pipeline_run, stage, step, "boundary-mask")
         boundary_mask = self._create_boundary_mask(segments)
         boundary_mask.save(output_path)
         print(f"Saved intermediate image to: {output_path}")
 
-        output_path = resolve_intermediate_path(self.pipeline_run, stage, "boundary-overlay-original")
+        output_path = resolve_intermediate_path(self.pipeline_run, stage, step, "boundary-overlay-original")
         self._overlay_boundaries(base_image, boundary_mask).save(output_path)
         print(f"Saved intermediate image to: {output_path}")
 
-        if self.preprocessing.name != PreprocessingEnum.NONE:
-            output_path = resolve_intermediate_path(self.pipeline_run, stage, "boundary-overlay-preprocessed")
-            self._overlay_boundaries(preprocessed_image, boundary_mask).save(output_path)
-            print(f"Saved intermediate image to: {output_path}")
-
-        output_path = resolve_intermediate_path(self.pipeline_run, stage, "segments-average-original")
+        output_path = resolve_intermediate_path(self.pipeline_run, stage, step, "segments-average-original")
         self._segements_average_color_image(base_image, segments).save(output_path)
         print(f"Saved intermediate image to: {output_path}")
 
-        if self.preprocessing.name != PreprocessingEnum.NONE:
-            output_path = resolve_intermediate_path(self.pipeline_run, stage, "segments-average-preprocessed")
+        if self.preprocessing and not all([p.name == PreprocessingEnum.NONE for p in self.preprocessing]):
+            output_path = resolve_intermediate_path(self.pipeline_run, stage, step, "boundary-overlay-preprocessed")
+            self._overlay_boundaries(preprocessed_image, boundary_mask).save(output_path)
+            print(f"Saved intermediate image to: {output_path}")
+
+            output_path = resolve_intermediate_path(self.pipeline_run, stage, step, "segments-average-preprocessed")
             self._segements_average_color_image(preprocessed_image, segments).save(output_path)
             print(f"Saved intermediate image to: {output_path}")
 

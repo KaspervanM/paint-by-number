@@ -4,7 +4,14 @@ from PIL import Image
 import argparse
 import pathlib
 
-from pbn.algorithms import PreprocessingEnum, SegmentationEnum, PostprocessingEnum, AssignmentEnum, RenderingEnum, ALGORITHM_MAP
+from pbn.algorithms import (
+    PreprocessingEnum,
+    SegmentationEnum,
+    PostprocessingEnum,
+    AssignmentEnum,
+    RenderingEnum,
+    ALGORITHM_MAP,
+)
 from pbn.output import resolve_output_path
 from pbn.datatypes import PipelineRun
 from pbn import PaintByNumber
@@ -65,11 +72,11 @@ def main() -> None:
         "-p",
         "--preprocessing",
         type=parse_enum_with_params(PreprocessingEnum),
-        default=(PreprocessingEnum.NONE, {}),
+        action="append",
         help=(
             "preprocessing algorithm and parameters. "
             f"Options: {{{', '.join(e for e in PreprocessingEnum)}}}. "
-            "Default: nop"
+            "Default: nop.  Can be specified multiple times to chain algorithms."
         ),
     )
     parser.add_argument(
@@ -98,11 +105,11 @@ def main() -> None:
         "-t",
         "--postprocessing",
         type=parse_enum_with_params(PostprocessingEnum),
-        default=(PostprocessingEnum.MERGE, {}),
+        action="append",
         help=(
             "segmentation postprocessing algorithm and parameters. "
             f"Options: {{{', '.join(e for e in PostprocessingEnum)}}}. "
-            "Default: merge"
+            "Default: merge.  Can be specified multiple times to chain algorithms."
         ),
     )
     parser.add_argument(
@@ -140,6 +147,8 @@ def main() -> None:
     output_dir: pathlib.Path = args.dir.resolve()
     output_file: Optional[pathlib.Path] = args.output.resolve() if args.output else None
     intermediate_dir: Optional[pathlib.Path] = args.intermediate_images.resolve() if args.intermediate_images else None
+    preprocessing_list = args.preprocessing if args.preprocessing else [(PreprocessingEnum.NONE, {})]
+    postprocessing_list = args.postprocessing if args.postprocessing else [(PostprocessingEnum.MERGE, {})]
 
     if not output_dir.is_dir():
         raise NotADirectoryError(f"{output_dir} does not exist or is not a directory")
@@ -153,9 +162,9 @@ def main() -> None:
             input_path=input_path,
             original_image=image.copy(),
             palette_path=palette_path,
-            preprocessing=ALGORITHM_MAP[args.preprocessing[0]](**args.preprocessing[1]),
+            preprocessing=[ALGORITHM_MAP[p[0]](**p[1]) for p in preprocessing_list],
             segmentation=ALGORITHM_MAP[args.segmentation[0]](**args.segmentation[1]),
-            postprocessing=ALGORITHM_MAP[args.postprocessing[0]](**args.postprocessing[1]),
+            postprocessing=[ALGORITHM_MAP[p[0]](**p[1]) for p in postprocessing_list],
             assignment=ALGORITHM_MAP[args.assignment[0]](**args.assignment[1]),
             rendering=ALGORITHM_MAP[args.rendering[0]](**args.rendering[1]),
             intermediate_dir=intermediate_dir,

@@ -47,7 +47,9 @@ But option 1 is recommended.
 ### Usage
 
 ```
-usage: pbn [-h] [-p PREPROCESSING] [-s SEGMENTATION] [-a ASSIGNMENT] [--dir DIR] [--output OUTPUT] [--intermediate-images INTERMEDIATE_IMAGES] input_image palette
+usage: pbn [-h] [-p PREPROCESSING] [-s SEGMENTATION] [-a ASSIGNMENT] [-t POSTPROCESSING] [-r RENDERING] [--dir DIR] [--output OUTPUT]
+           [--intermediate-images INTERMEDIATE_IMAGES]
+           input_image palette
 
 Paint by Number: Convert images to a palette-based representation. The resulting image is in PPM format.
 
@@ -58,14 +60,21 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   -p, --preprocessing PREPROCESSING
-                        preprocessing algorithm and parameters. Options: {nop, floyd-steinberg}. Default: nop
+                        preprocessing algorithm and parameters. Options: {nop, floyd-steinberg}. Default: nop. Can be specified multiple times to
+                        chain algorithms.
   -s, --segmentation SEGMENTATION
-                        segmentation algorithm and parameters. Options: {grid}. Default: grid,cell_size=1
+                        segmentation algorithm and parameters. Options: {grid, voronoi, kmeans, watershed, lab_watershed}. Default:
+                        grid,cell_size=1
   -a, --assignment ASSIGNMENT
                         color assignment algorithm to map palette colors to segments. Options: {average-nearest}. Default: average-nearest
+  -t, --postprocessing POSTPROCESSING
+                        segmentation postprocessing algorithm and parameters. Options: {nop, merge, smooth}. Default: merge. Can be specified
+                        multiple times to chain algorithms.
+  -r, --rendering RENDERING
+                        rendering algorithm to render segments. E.g. colored image or numbered image. Options: {colored}. Default: color
   --dir, -d DIR         directory to save the output image. Default: current directory
   --output, -o OUTPUT   exact output file path and overrides --dir if provided
-  --intermediate-images INTERMEDIATE_IMAGES
+  --intermediate-images, -i INTERMEDIATE_IMAGES
                         enables storing intermediate images by providing directory where to store them
 
 Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0
@@ -80,9 +89,9 @@ The project is a work in progress. So far, only two quantization algorithms have
 
 I plan to implement segmentation algorithms to get one step closer to a true paint by number generator:
 
-- Voronoi-based image segmentation
-- K-means / clustering with spatial regularization
-- Watershed segmentation
+- Voronoi-based image segmentation (Implemented)
+- K-means / clustering with spatial regularization (Implemented)
+- Watershed segmentation (Implemented, just use this one, the others produce garbage)
 - Superpixels
 - region growing
 - graph cuts

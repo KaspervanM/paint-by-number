@@ -3,7 +3,7 @@ from typing import List, Tuple, Dict, Any, Optional, Sequence, cast, TYPE_CHECKI
 from dataclasses import dataclass, field
 from enum import StrEnum
 from PIL import Image
-from abc import ABC
+from abc import ABC, abstractmethod
 import pathlib
 
 if TYPE_CHECKING:
@@ -25,6 +25,7 @@ class PipelineStageEnum(StrEnum):
     SEGMENTATION = "segmentation"
     POSTPROCESSING = "postprocessing"
     COLOR_ASSINGMENT = "color-assignment"
+    RENDERING = "rendering"
 
 
 @dataclass
@@ -35,9 +36,9 @@ class PipelineRun:
     original_image: Image.Image
     palette_path: pathlib.Path
 
-    preprocessing: ImageProcessingAlgorithm
+    preprocessing: List[ImageProcessingAlgorithm]
     segmentation: ImageSegmentationAlgorithm
-    postprocessing: SegmentsProcessingAlgorithm
+    postprocessing: List[SegmentsProcessingAlgorithm]
     assignment: ColorAssignmentAlgorithm
     rendering: SegmentRenderingAlgorithm
 
@@ -90,6 +91,10 @@ class BaseSegmentedImage(ABC):
                 labels[y][x] = seg.id
         self.labels = labels
 
+    @abstractmethod
+    def copy(self) -> BaseSegmentedImage:
+        pass
+
 
 @dataclass
 class SegmentedImage(BaseSegmentedImage):
@@ -112,6 +117,14 @@ class SegmentedImage(BaseSegmentedImage):
         """Create SegmentedImage from Segment objects."""
         return cls(width=width, height=height, segments=segments)
 
+    def copy(self) -> SegmentedImage:
+        return SegmentedImage(
+            width=self.width,
+            height=self.height,
+            segments=[Segment(id=seg.id, pixels=list(seg.pixels)) for seg in self.segments],
+            metadata=dict(self.metadata),
+        )
+
 
 @dataclass
 class ColoredSegmentedImage(BaseSegmentedImage):
@@ -133,11 +146,13 @@ class ColoredSegmentedImage(BaseSegmentedImage):
         if isinstance(segments, BaseSegmentedImage):
             if isinstance(segments, SegmentedImage):
                 segments = segments.segments
-            elif isinstance(segments, ColoredSegmentedImage):
-                return segments
+            elif isinstance(segments, ColoredSegmentedImage) and not color_map:
+                return segments.copy()
+            elif color_map:
+                segments = segments.copy().segments
             else:
                 raise TypeError()
-        if all(isinstance(seg, ColoredSegment) for seg in segments):
+        if all(isinstance(seg, ColoredSegment) for seg in segments) and not color_map:
             colored_segments: List[ColoredSegment] = list(cast(Sequence[ColoredSegment], segments))
         else:
             if color_map is None:
@@ -149,3 +164,11 @@ class ColoredSegmentedImage(BaseSegmentedImage):
                 colored_segments.append(ColoredSegment(id=seg.id, pixels=seg.pixels, color=color_map[seg.id]))
 
         return cls(width=width, height=height, segments=colored_segments)
+
+    def copy(self) -> ColoredSegmentedImage:
+        return ColoredSegmentedImage(
+            width=self.width,
+            height=self.height,
+            segments=[ColoredSegment(id=seg.id, pixels=list(seg.pixels), color=seg.color) for seg in self.segments],
+            metadata=dict(self.metadata),
+        )

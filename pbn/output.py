@@ -16,16 +16,19 @@ def serialize_params(params: Dict[str, Any]) -> str:
     return "_".join(parts)
 
 
-def make_intermediate_filename(pipeline_run: PipelineRun, stage: PipelineStageEnum, notes: str = "") -> str:
+def make_intermediate_filename(pipeline_run: PipelineRun, stage: PipelineStageEnum, step: int, notes: str) -> str:
     """Generate a descriptive filename for an intermediate stage."""
     parts = [pipeline_run.input_path.stem, pipeline_run.palette_path.stem, stage]
 
     if notes:
         parts.append(notes)
 
-    parts.append(pipeline_run.preprocessing.name)
-    if pipeline_run.preprocessing.params:
-        parts.append(serialize_params(pipeline_run.preprocessing.params))
+    for i, preprocessing_algo in enumerate(pipeline_run.preprocessing):
+        if stage == PipelineStageEnum.PREPROCESSING and i > step:
+            break
+        parts.append(preprocessing_algo.name)
+        if preprocessing_algo.params:
+            parts.append(serialize_params(preprocessing_algo.params))
 
     if stage in (PipelineStageEnum.SEGMENTATION, PipelineStageEnum.POSTPROCESSING):
         parts.append(pipeline_run.segmentation.name)
@@ -33,37 +36,48 @@ def make_intermediate_filename(pipeline_run: PipelineRun, stage: PipelineStageEn
             parts.append(serialize_params(pipeline_run.segmentation.params))
 
     if stage == PipelineStageEnum.POSTPROCESSING:
-        parts.append(pipeline_run.postprocessing.name)
-        if pipeline_run.postprocessing.params:
-            parts.append(serialize_params(pipeline_run.postprocessing.params))
+        for i, postprocessing_algo in enumerate(pipeline_run.postprocessing):
+            if i > step:
+                break
+            parts.append(postprocessing_algo.name)
+            if postprocessing_algo.params:
+                parts.append(serialize_params(postprocessing_algo.params))
 
-    if stage == PipelineStageEnum.COLOR_ASSINGMENT:
+    if stage in (PipelineStageEnum.COLOR_ASSINGMENT, PipelineStageEnum.RENDERING):
         raise ValueError("Unsupported stage.")
 
     return "_".join(parts) + ".ppm"
 
 
-def resolve_intermediate_path(pipeline_run: PipelineRun, stage: PipelineStageEnum, notes: str = "") -> pathlib.Path:
+def resolve_intermediate_path(pipeline_run: PipelineRun, stage: PipelineStageEnum, step: int = 0, notes: str = "") -> pathlib.Path:
     """Determine final output path, auto-generated in a directory."""
     if not pipeline_run.intermediate_dir:
         raise RuntimeError("An intermediate image path cannot be created without a provided directory.")
 
-    return pipeline_run.intermediate_dir / make_intermediate_filename(pipeline_run, stage, notes)
+    return pipeline_run.intermediate_dir / make_intermediate_filename(pipeline_run, stage, step, notes)
 
 
 def make_output_filename(pipeline_run: PipelineRun) -> str:
     """Create a descriptive output filename based on input, palette, algorithms, and parameters."""
     parts = [pipeline_run.input_path.stem, pipeline_run.palette_path.stem]
 
-    for name, params in [
-        (pipeline_run.preprocessing.name, pipeline_run.preprocessing.params),
-        (pipeline_run.segmentation.name, pipeline_run.segmentation.params),
-        (pipeline_run.postprocessing.name, pipeline_run.postprocessing.params),
-        (pipeline_run.assignment.name, pipeline_run.assignment.params),
-    ]:
-        parts.append(name)
-        if params:
-            parts.append(serialize_params(params))
+    for preprocessing_algo in pipeline_run.preprocessing:
+        parts.append(preprocessing_algo.name)
+        if preprocessing_algo.params:
+            parts.append(serialize_params(preprocessing_algo.params))
+
+    parts.append(pipeline_run.segmentation.name)
+    if pipeline_run.segmentation.params:
+        parts.append(serialize_params(pipeline_run.segmentation.params))
+
+    for postprocessing_algo in pipeline_run.postprocessing:
+        parts.append(postprocessing_algo.name)
+        if postprocessing_algo.params:
+            parts.append(serialize_params(postprocessing_algo.params))
+
+    parts.append(pipeline_run.assignment.name)
+    if pipeline_run.assignment.params:
+        parts.append(serialize_params(pipeline_run.assignment.params))
 
     filename = "_".join(parts) + ".ppm"
     return filename
