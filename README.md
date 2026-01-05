@@ -86,11 +86,11 @@ The project is a work in progress. So far, a pipeline has been constructed that 
 
 1. preprocessing (image -> image)
 2. segmentation (image -> segments)
-3. postprocessing (segments -> segments)
 4. color-assignment (segments -> colored segments)
+3. postprocessing (colored segments -> colored segments)
 5. rendering (colored segments -> image)
 
-The idea is that the preprocessing contains stuff like (edge) sharpening, blurring, etc. The segmentation is algorithms like voronoi and k-means clustering, superpixels, region growing, graph cuts, contour tracing, etc. Then, postprocessing could do stuff like merging segments, smoothing segments, etc. Color assignment would assign colors to the segments, depending on the palette available, e.g.: Apply the palette color closest the average color of each segment.. Finally, rendering creates the paint-by-number template where the segments contain a number and each number corresponds with a color, or already is colored to see what the painted image would look like.
+The idea is that the preprocessing contains stuff like (edge) sharpening, blurring, etc. The segmentation is algorithms like voronoi and k-means clustering, superpixels, region growing, graph cuts, contour tracing, etc. Color assignment would assign colors to the segments, depending on the palette available, e.g.: Apply the palette color closest the average color of each segment. Then, postprocessing could do stuff like merging segments, smoothing segments, etc. Finally, rendering creates the paint-by-number template where the segments contain a number and each number corresponds with a color, or already is colored to see what the painted image would look like.
 
 Maybe this can be of some inspiration:
 

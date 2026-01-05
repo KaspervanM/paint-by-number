@@ -23,8 +23,8 @@ Palette = List[Color]
 class PipelineStageEnum(StrEnum):
     PREPROCESSING = "preprocessing"
     SEGMENTATION = "segmentation"
-    POSTPROCESSING = "postprocessing"
     COLOR_ASSINGMENT = "color-assignment"
+    POSTPROCESSING = "postprocessing"
     RENDERING = "rendering"
 
 
