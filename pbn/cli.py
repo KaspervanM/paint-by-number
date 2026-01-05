@@ -63,7 +63,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         prog="pbn",
         description="Paint by Number: Convert images to a palette-based representation. The resulting image is in PPM format.",
-        epilog="Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0",
+        epilog="Author: Kasper van Maasdam. Date: December 2025. License: GPL v3.0",
     )
 
     parser.add_argument("input_image", type=pathlib.Path, help="path to the input image")

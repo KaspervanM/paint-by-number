@@ -18,9 +18,9 @@ cd paint-by-number
 pip install -e .
 ```
 
-Run `pip install -e .[dev]` instead for development.
+For development, run `pip install -e .[dev]` instead.
 
-Dependencies (currently just Pillow) will be installed automatically.
+Dependencies will be installed automatically.
 
 ## Running the CLI
 
@@ -31,15 +31,15 @@ You can run the tool in several ways:
 After installing with `pip install -e .` or `pip install -e .[dev]`:
 
 ```bash
-pbn images/my_image.png palettes/my_palette.txt
+pbn my_image.png my_palette.txt
 ```
 
 ### 2. Using the module
 
-For development, you could use:
+You could use:
 
 ```bash
-python3 -m pbn.cli images/my_image.png palettes/my_palette.txt
+python3 -m pbn.cli my_image.png my_palette.txt
 ```
 
 But option 1 is recommended.
@@ -77,31 +77,26 @@ options:
   --intermediate-images, -i INTERMEDIATE_IMAGES
                         enables storing intermediate images by providing directory where to store them
 
-Author: Kasper van Maasdam. Date: December 2025. Licence: GPL v3.0
+Author: Kasper van Maasdam. Date: December 2025. License: GPL v3.0
 ```
 
 ## Notes
 
-The project is a work in progress. So far, only two quantization algorithms have been implemented:
+The project is a work in progress. So far, a pipeline has been constructed that consists of the following stages:
 
-- nearest (Not an explicit algorithm, but the default behaviour)
-- Floyd-Steinberg dithering
+1. preprocessing (image -> image)
+2. segmentation (image -> segments)
+3. postprocessing (segments -> segments)
+4. color-assignment (segments -> colored segments)
+5. rendering (colored segments -> image)
 
-I plan to implement segmentation algorithms to get one step closer to a true paint by number generator:
-
-- Voronoi-based image segmentation (Implemented)
-- K-means / clustering with spatial regularization (Implemented)
-- Watershed segmentation (Implemented, just use this one, the others produce garbage)
-- Superpixels
-- region growing
-- graph cuts
-- contour tracing
-
-And then apply the palette color closest the average color of each segment.
+The idea is that the preprocessing contains stuff like (edge) sharpening, blurring, etc. The segmentation is algorithms like voronoi and k-means clustering, superpixels, region growing, graph cuts, contour tracing, etc. Then, postprocessing could do stuff like merging segments, smoothing segments, etc. Color assignment would assign colors to the segments, depending on the palette available, e.g.: Apply the palette color closest the average color of each segment.. Finally, rendering creates the paint-by-number template where the segments contain a number and each number corresponds with a color, or already is colored to see what the painted image would look like.
 
 Maybe this can be of some inspiration:
 
 - https://github.com/fogleman/primitive
 - https://scikit-image.org/docs/0.25.x/auto_examples/segmentation/plot_segmentations.html
 
-Perhaps it would be even better to segment while keeping the palette in mind, not just applying it afterwards. Maybe I could think of some error functions like similarity to original image, smootheness of the segments, size of the segments, etc. Then, I can try to find a way to minimize these. I believe that this would result in good paint-by-number images.
+Perhaps it would be even better to segment while keeping the palette in mind, not just applying it afterwards. Maybe I could think of some error functions like similarity to original image, smoothness of the segments, size of the segments, etc. Then, I can try to find a way to minimize these. I believe that this would result in good paint-by-number images.
+
+Additionally, it would be nice to be able to have the program select the best n colors from a palette. This way you could provide a lot of standard paint colors and then the program would tell you which one to buy. Perhaps this could be expanded by being able to provide multiple images and select the n best colors from the palette for such that not just one image is best, but all work for those same colors.
