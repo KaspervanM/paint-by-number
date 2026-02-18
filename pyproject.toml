@@ -27,8 +27,10 @@ dev = [
 [project.scripts]
 pbn = "pbn.cli:main"
 
-[tool.setuptools]
-packages = ["pbn"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pbn*"]
+
 
 [tool.mypy]
 ignore_missing_imports = true
