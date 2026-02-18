@@ -15,10 +15,10 @@ Clone the repository and install in editable mode:
 ```bash
 git clone https://github.com/KaspervanM/paint-by-number.git
 cd paint-by-number
-pip install -e .
+pip install -e . # Not needed when using Nix
 ```
 
-For development, run `pip install -e .[dev]` instead.
+For development, run `pip install -e .[dev]` instead, if not using Nix.
 
 Dependencies will be installed automatically.
 
@@ -42,7 +42,9 @@ You could use:
 python3 -m pbn.cli my_image.png my_palette.txt
 ```
 
-But option 1 is recommended.
+But option 1 is recommended for non-nix development.
+
+If using Nix, use option 2 after entering the development shell `nix develop`. You could also just run `nix run`.
 
 ### Usage
 
